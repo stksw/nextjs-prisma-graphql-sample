@@ -17,9 +17,8 @@ export const resolvers: Resolvers = {
 
   Mutation: {
     addTodo: async (_, { title }, { prisma, currentUser }) => {
-      if (!currentUser) {
-        throw new Error('User not logged in.');
-      }
+      if (!currentUser) throw new Error('User not logged in.');
+
       const todo = await prisma.todo.create({
         data: { userId: currentUser.id, title },
         include: { user: true },
@@ -31,19 +30,16 @@ export const resolvers: Resolvers = {
       { todoId, title, completed },
       { prisma, currentUser }
     ) => {
-      if (!currentUser) {
-        throw new Error('User not logged in.');
-      }
+      if (!currentUser) throw new Error('User not logged in.');
+
       const targetTodo = await prisma.todo.findUnique({
         where: { id: todoId },
       });
-      if (targetTodo?.userId !== currentUser.id) {
+      if (targetTodo?.userId !== currentUser.id)
         throw new Error('Invalid user.');
-      }
+
       const todo = await prisma.todo.update({
-        where: {
-          id: todoId,
-        },
+        where: { id: todoId },
         data: {
           ...(title && { title }),
           ...(completed !== undefined && completed !== null
@@ -55,15 +51,14 @@ export const resolvers: Resolvers = {
       return todo;
     },
     deleteTodo: async (_, { todoId }, { prisma, currentUser }) => {
-      if (!currentUser) {
-        throw new Error('User not logged in.');
-      }
+      if (!currentUser) throw new Error('User not logged in.');
+
       const targetTodo = await prisma.todo.findUnique({
         where: { id: todoId },
       });
-      if (targetTodo?.userId !== currentUser.id) {
+      if (targetTodo?.userId !== currentUser.id)
         throw new Error('Invalid user.');
-      }
+
       const todo = await prisma.todo.delete({
         where: { id: todoId },
         include: { user: true },
